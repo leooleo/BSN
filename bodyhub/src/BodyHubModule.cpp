@@ -4,8 +4,10 @@
  * @author Ricardo Diniz Caldas
  * @version v1.0
  */
-
+#include <chrono>
 #include "BodyHubModule.h"
+
+using namespace std::chrono;
 
 BodyHubModule::BodyHubModule(const int32_t &argc, char **argv) :
     TimeTriggeredConferenceClientModule(argc, argv, "bodyhub"),
@@ -111,12 +113,22 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode BodyHubModule::body() 
     
     timespec ts; // timestamp
 
+    bool first_exec = true;
+    int uhs_duration,phs_duration, emg_duration, print_duration, total_duration;
+    double uhs_sum = 0;
+    double phs_sum = 0;
+    double emg_sum = 0;
+    double print_sum = 0;
+    
+    high_resolution_clock::time_point t1;
+    high_resolution_clock::time_point t2;
+
     bool is_emergency = false; // variável booleana utilizada para avisar sobre estados de emergencia
     uint32_t sensor_id = 0;    // varável utilizada para capturar e persistir o id do sensor que enviou os dados
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
         
-        while(!m_buffer.isEmpty()){
+        while(!m_buffer.isEmpty()){            
 
             clock_gettime(CLOCK_REALTIME, &ts); //captura novo timestamp do processador para imprimir no registro
 
@@ -126,19 +138,58 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode BodyHubModule::body() 
             if (container.getDataType() == SensorData::ID()) {
 
                 // ATUALIZA ESTADO DO PACIENTE
+                t1 = high_resolution_clock::now();                
                 BodyHubModule::updateHealthStatus(container.getData<SensorData>());
-                sensor_id= container.getData<SensorData>().getSensorID();
+                sensor_id = container.getData<SensorData>().getSensorID();
+                t2 = high_resolution_clock::now();
 
+                uhs_duration = duration_cast<microseconds>( t2 - t1 ).count();
                 // DETECTA EMERGÊNCIA
+                t1 = high_resolution_clock::now(); 
                 is_emergency=(container.getData<SensorData>().getSensorStatus() == "alto")?true:false;
                 CLOG1<<"Emergencia?"<<is_emergency<<endl;
+                t2 = high_resolution_clock::now(); 
+
+                emg_duration = duration_cast<microseconds>( t2 - t1 ).count();
 
                 // PERSISTE
+                t1 = high_resolution_clock::now(); 
                 BodyHubModule::persistHealthStatus(sensor_id, container.getData<SensorData>().getSentTimespec(), ts);
+                t2 = high_resolution_clock::now(); 
+
+                phs_duration = duration_cast<microseconds>( t2 - t1 ).count();
             }
 
             //imprime dados atuais
+            t1 = high_resolution_clock::now(); 
             BodyHubModule::printHealthStatus();
+            t2 = high_resolution_clock::now(); 
+
+            print_duration = duration_cast<microseconds>( t2 - t1 ).count();
+
+            total_duration = phs_duration + uhs_duration + emg_duration + print_duration;
+
+            if(first_exec){
+                uhs_sum = (100* ((float)uhs_duration / (float)total_duration ));
+                phs_sum = (100* ((float)phs_duration / (float)total_duration ));
+                emg_sum = (100* ((float)emg_duration / (float)total_duration ));
+                print_sum = (100* ((float)print_duration / (float)total_duration ));
+                first_exec = false;
+            }
+            else{
+                uhs_sum = (uhs_sum + 100* ((float)uhs_duration / (float)total_duration ))/2;
+                phs_sum = (phs_sum + 100* ((float)phs_duration / (float)total_duration ))/2;
+                emg_sum = (emg_sum +100* ((float)emg_duration / (float)total_duration ))/2;
+                print_sum = (print_sum +100* ((float)print_duration / (float)total_duration ))/2;
+  
+            }
+
+            cout << "Time: \n";
+            cout << "   uhs " << uhs_sum<< "\n";
+            cout << "   phs " << phs_sum<< "\n";
+            cout << "   emg " <<  emg_sum << "\n";
+            cout << "   print " <<  print_sum << "\n";
+            
         }            
         
     }
