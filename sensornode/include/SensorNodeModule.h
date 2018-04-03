@@ -16,10 +16,12 @@
 #include <sys/time.h>
 #include <iostream>
 #include <string>
+#include <chrono>
 
 using namespace std;
 using namespace odcore::base::module;
 using namespace openbasn::data;
+using namespace std::chrono;
 
 class SensorNodeModule : public TimeTriggeredConferenceClientModule {
 

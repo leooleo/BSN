@@ -146,10 +146,19 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode SensorNodeModule::body
 
     timespec ts;        // timestamp do processador
 
+    bool first_exec = true;
+    int gd_duration, sta_duration, ssd_duration, print_duration, total_duration;
+    double gd_sum = 0;
+    double sta_sum = 0;
+    double ssd_sum = 0;
+    double print_sum = 0;
+    high_resolution_clock::time_point t1;
+    high_resolution_clock::time_point t2;
+
     srand(time(NULL));  // raíz da função de randomização
     bool exe;           // variável do atuador
     int cycles = 0;     // contador de ciclos desde a ultima execução
-    
+
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
         
         cycles++;
@@ -158,24 +167,60 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode SensorNodeModule::body
 
         if(exe){
             /*GERAR DADOS*/
+            t1 = high_resolution_clock::now();
             string categorized_data = generateData(m_status);
+            t2 = high_resolution_clock::now();
+            gd_duration = duration_cast<microseconds>(t2 - t1).count();
 
             /*CAPTURAR INSTANTE DO PROCESSADOR*/
             clock_gettime(CLOCK_REALTIME, &ts);
 
             /*ANALISAR DADOS*/
+            t1 = high_resolution_clock::now();
             m_status = statusAnalysis(categorized_data, m_status);
+            t2 = high_resolution_clock::now();
+            sta_duration = duration_cast<microseconds>(t2 - t1).count();
 
             /*ENVIAR ESTADO*/
+            t1 = high_resolution_clock::now();
             SensorNodeModule::sendSensorData(SensorData(m_id, m_sensor_type, m_status, ts));
+            t2 = high_resolution_clock::now();
+            ssd_duration = duration_cast<microseconds>(t2 - t1).count();
 
             cycles = 0;
 
+            t1 = high_resolution_clock::now();
             cout << "Actual status: " << m_status << " | Data sampled: " << categorized_data << " at " << TimeStamp().getYYYYMMDD_HHMMSSms() << endl;
             timespec t_esy = elapsedTime(ts, m_ref);
             m_status_log << (double)((t_esy.tv_sec) + (t_esy.tv_nsec/1E9)) << ",";
             m_status_log << ((m_status=="baixo")?1:(m_status=="moderado")?2:3) << ",";
             m_status_log << " " << "\n";
+            t2 = high_resolution_clock::now();
+            print_duration = duration_cast<microseconds>(t2 - t1).count();
+
+            total_duration = gd_duration + sta_duration + ssd_duration + print_duration;
+
+            if (first_exec)
+            {
+                gd_sum = (100 * ((float)gd_duration / (float)total_duration));
+                ssd_sum = (100 * ((float)ssd_duration / (float)total_duration));
+                sta_sum = (100 * ((float)sta_duration / (float)total_duration));
+                print_sum = (100 * ((float)print_duration / (float)total_duration));
+                first_exec = false;
+            }
+            else
+            {
+                gd_sum = (gd_sum + 100 * ((float)gd_duration / (float)total_duration)) / 2;
+                ssd_sum = (ssd_sum + 100 * ((float)ssd_duration / (float)total_duration)) / 2;
+                sta_sum = (sta_sum + 100 * ((float)sta_duration / (float)total_duration)) / 2;
+                print_sum = (print_sum + 100 * ((float)print_duration / (float)total_duration)) / 2;
+            }
+
+            cout << "Time: \n";
+            cout << "   generateData " << gd_sum << "\n";
+            cout << "   statusAnalysis " << sta_sum << "\n";
+            cout << "   sendSensorData " << ssd_sum << "\n";
+            cout << "   prints " << print_sum << "\n";
         }
     }
     

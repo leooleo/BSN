@@ -144,6 +144,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode BodyHubModule::body() 
                 t2 = high_resolution_clock::now();
 
                 uhs_duration = duration_cast<microseconds>( t2 - t1 ).count();
+                
                 // DETECTA EMERGÊNCIA
                 t1 = high_resolution_clock::now(); 
                 is_emergency=(container.getData<SensorData>().getSensorStatus() == "alto")?true:false;
