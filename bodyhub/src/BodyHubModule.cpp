@@ -5,6 +5,7 @@
  * @version v1.0
  */
 #include <chrono>
+#include <future>
 #include "BodyHubModule.h"
 
 using namespace std::chrono;
@@ -98,27 +99,26 @@ void BodyHubModule::persistHealthStatus(uint32_t sensor_id, timespec t_sen, time
     m_status_log << (result.tv_sec) + (result.tv_nsec/1E9) << "\n";
 }
 
-void BodyHubModule::printHealthStatus(){
-    cout << "----------------------------------------"<<endl;
-    for(uint32_t i = 0; i < 3; i++){
-        cout << ((i==0)?"Thermometer: ":(i==1)?"ECG: ":"Oximeter: ");
-        cout << m_sensor[i] << endl;
-    }
-    cout << "Health Status: " << m_health_status << endl;
-    cout << "----------------------------------------"<<endl;
+void BodyHubModule::printHealthStatus() {    
+        printf("----------------------------------------\n");
+        for(uint32_t i = 0; i < 3; i++){
+            printf("%s",(i==0)?"Thermometer: ":(i==1)?"ECG: ":"Oximeter: ");
+            printf("%s\n", m_sensor[i].c_str());
+        }
+        printf("Health Status: %s", m_health_status.c_str());
+        printf("----------------------------------------\n");
 }
 
 // CORPO
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode BodyHubModule::body() { 
     
     timespec ts; // timestamp
-
-    bool first_exec = true;
     int uhs_duration,phs_duration, emg_duration, print_duration, total_duration;
     double uhs_sum = 0;
     double phs_sum = 0;
     double emg_sum = 0;
     double print_sum = 0;
+    int cont = 0;
     
     high_resolution_clock::time_point t1;
     high_resolution_clock::time_point t2;
@@ -144,7 +144,6 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode BodyHubModule::body() 
                 t2 = high_resolution_clock::now();
 
                 uhs_duration = duration_cast<microseconds>( t2 - t1 ).count();
-                
                 // DETECTA EMERGÊNCIA
                 t1 = high_resolution_clock::now(); 
                 is_emergency=(container.getData<SensorData>().getSensorStatus() == "alto")?true:false;
@@ -163,33 +162,25 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode BodyHubModule::body() 
 
             //imprime dados atuais
             t1 = high_resolution_clock::now(); 
-            BodyHubModule::printHealthStatus();
+            BodyHubModule::printHealthStatus();        
             t2 = high_resolution_clock::now(); 
+
 
             print_duration = duration_cast<microseconds>( t2 - t1 ).count();
 
             total_duration = phs_duration + uhs_duration + emg_duration + print_duration;
 
-            if(first_exec){
-                uhs_sum = (100* ((float)uhs_duration / (float)total_duration ));
-                phs_sum = (100* ((float)phs_duration / (float)total_duration ));
-                emg_sum = (100* ((float)emg_duration / (float)total_duration ));
-                print_sum = (100* ((float)print_duration / (float)total_duration ));
-                first_exec = false;
-            }
-            else{
-                uhs_sum = (uhs_sum + 100* ((float)uhs_duration / (float)total_duration ))/2;
-                phs_sum = (phs_sum + 100* ((float)phs_duration / (float)total_duration ))/2;
-                emg_sum = (emg_sum +100* ((float)emg_duration / (float)total_duration ))/2;
-                print_sum = (print_sum +100* ((float)print_duration / (float)total_duration ))/2;
+            uhs_sum = (uhs_sum * cont + 100* ((float)uhs_duration / (float)total_duration ))/(cont+1);
+            phs_sum = (phs_sum * cont + 100* ((float)phs_duration / (float)total_duration ))/(cont+1);
+            emg_sum = (emg_sum * cont + 100* ((float)emg_duration / (float)total_duration ))/(cont+1);
+            print_sum = (print_sum * cont +100* ((float)print_duration / (float)total_duration ))/(cont+1);
+            cont++;
   
-            }
-
-            cout << "Time: \n";
-            cout << "   uhs " << uhs_sum<< "\n";
-            cout << "   phs " << phs_sum<< "\n";
-            cout << "   emg " <<  emg_sum << "\n";
-            cout << "   print " <<  print_sum << "\n";
+            printf( "Time: \n");
+            printf( "   uhs %lf\n",  uhs_sum);
+            printf( "   phs %lf\n",  phs_sum);
+            printf( "   emg %lf\n",  emg_sum);
+            printf( "   print %lf\n", print_sum);
             
         }            
         
