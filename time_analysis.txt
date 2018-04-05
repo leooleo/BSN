@@ -1,0 +1,11 @@
+Sensor Node analyze(In percent of time):
+    generateData 2.16591
+    statusAnalysis 3.08598
+    sendSensorData 54.6209
+    prints 40.1272
+
+BodyHub analyze(In percent of time):
+    uhs 45.806951
+    phs 22.775806
+    emg 11.548823
+    print 19.868420

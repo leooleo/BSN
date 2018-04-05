@@ -3,3 +3,4 @@ build/
 output/
 *.out
 *.o
+test/main

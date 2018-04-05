@@ -146,8 +146,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode SensorNodeModule::body
 
     timespec ts;        // timestamp do processador
 
-    bool first_exec = true;
     int gd_duration, sta_duration, ssd_duration, print_duration, total_duration;
+    int cont = 0;
     double gd_sum = 0;
     double sta_sum = 0;
     double ssd_sum = 0;
@@ -200,22 +200,11 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode SensorNodeModule::body
 
             total_duration = gd_duration + sta_duration + ssd_duration + print_duration;
 
-            if (first_exec)
-            {
-                gd_sum = (100 * ((float)gd_duration / (float)total_duration));
-                ssd_sum = (100 * ((float)ssd_duration / (float)total_duration));
-                sta_sum = (100 * ((float)sta_duration / (float)total_duration));
-                print_sum = (100 * ((float)print_duration / (float)total_duration));
-                first_exec = false;
-            }
-            else
-            {
-                gd_sum = (gd_sum + 100 * ((float)gd_duration / (float)total_duration)) / 2;
-                ssd_sum = (ssd_sum + 100 * ((float)ssd_duration / (float)total_duration)) / 2;
-                sta_sum = (sta_sum + 100 * ((float)sta_duration / (float)total_duration)) / 2;
-                print_sum = (print_sum + 100 * ((float)print_duration / (float)total_duration)) / 2;
-            }
-
+            gd_sum = (gd_sum * cont + 100 * ((float)gd_duration / (float)total_duration)) / (cont+1);
+            ssd_sum = (ssd_sum * cont + 100 * ((float)ssd_duration / (float)total_duration)) / (cont+1);
+            sta_sum = (sta_sum * cont + 100 * ((float)sta_duration / (float)total_duration)) / (cont+1);
+            print_sum = (print_sum * cont + 100 * ((float)print_duration / (float)total_duration)) / (cont+1);
+            cont++;
             cout << "Time: \n";
             cout << "   generateData " << gd_sum << "\n";
             cout << "   statusAnalysis " << sta_sum << "\n";
