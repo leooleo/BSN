@@ -14,8 +14,7 @@
 #include "bsn/entity/SensorNode.h"
 #include "bsn/persistence/PersistenceModule.h"
 #include "bsn/statistics/VitalStatistics.h"
-
-#include "../../../simulation/communications/include/data_receiver.hpp"
+#include "bsn/receiver/data_receiver.hpp"
 
 #include <deque>
 #include <fstream>
