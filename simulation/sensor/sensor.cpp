@@ -1,12 +1,12 @@
-#include "../communications/include/data_sender.hpp"
-#include "../VitalStatistics/include/VitalStatistics.h"
+#include "bsn/sender/data_sender.hpp"
+#include "bsn/statistics/include/VitalStatistics.h"
 #include <bits/stdc++.h>
 
 using namespace std;
 
 int main(){
     ofstream slog;
-    slog.open("../../persistence/output/sensor_packages.txt");
+    slog.open("persistence/output/sensor_packages.txt");
     try{
         data_sender connection;
         for( ; ; ){          
