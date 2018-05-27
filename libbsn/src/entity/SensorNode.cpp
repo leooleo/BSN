@@ -1,4 +1,4 @@
-#include "bsn/entity/SensorNode.h"
+#include "bsn/entity/SensorNode.hpp"
 
 namespace bsn {
     namespace entity { 

@@ -5,7 +5,7 @@
  * @version v1.0
  */
 
-#include "SensorNodeModule.h"
+#include "SensorNodeModule.hpp"
 
 SensorNodeModule::SensorNodeModule(const int32_t &argc, char **argv) : TimeTriggeredConferenceClientModule(argc, argv, "sensornode"),
 m_id(getIdentifier()),

@@ -1,4 +1,4 @@
-#include "bsn/persistence/PersistenceModule.h"
+#include "bsn/persistence/PersistenceModule.hpp"
 
 using namespace std;
 

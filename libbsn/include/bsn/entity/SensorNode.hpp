@@ -3,7 +3,7 @@
 
 #include "opendavinci/odcore/data/Container.h"
 
-#include "../persistence/PersistenceModule.h"
+#include "../persistence/PersistenceModule.hpp"
 
 using namespace std;
 using namespace odcore::data;

@@ -1,6 +1,9 @@
+#ifndef TEST_BODYHUB_H
+#define TEST_BODYHUB_H
+
 #include <cxxtest/TestSuite.h>
-#include "bsn/entity/BodyHub.h"
-#include "bsn/data/SensorData.h"
+#include "bsn/entity/BodyHub.hpp"
+#include "bsn/data/SensorData.hpp"
 
 
 using namespace std;
@@ -40,3 +43,5 @@ class BodyHubTestSuite : public CxxTest::TestSuite{
     }
 
 };
+
+#endif

@@ -5,7 +5,7 @@
  * @version v1.0
  */
 
-#include "bsn/data/SensorData.h"
+#include "bsn/data/SensorData.hpp"
 
 namespace bsn {
     namespace data {

@@ -1,4 +1,4 @@
-#include "bsn/statistics/VitalStatistics.h"
+#include "bsn/statistics/VitalStatistics.hpp"
 
 using namespace std;
 

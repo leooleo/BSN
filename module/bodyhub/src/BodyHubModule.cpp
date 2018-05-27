@@ -5,7 +5,7 @@
  * @version v1.0
  */
 
-#include "BodyHubModule.h"
+#include "BodyHubModule.hpp"
 
 using namespace odcore::data::dmcp;
 
