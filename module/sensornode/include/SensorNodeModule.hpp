@@ -10,10 +10,10 @@
 
 #include "opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h"
 
-#include "bsn/data/SensorData.h"
-#include "bsn/entity/SensorNode.h"
-#include "bsn/persistence/PersistenceModule.h"
-#include "bsn/statistics/VitalStatistics.h"
+#include "bsn/data/SensorData.hpp"
+#include "bsn/entity/SensorNode.hpp"
+#include "bsn/persistence/PersistenceModule.hpp"
+#include "bsn/statistics/VitalStatistics.hpp"
 #include "bsn/receiver/data_receiver.hpp"
 
 #include <deque>
