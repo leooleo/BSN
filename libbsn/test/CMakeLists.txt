@@ -47,7 +47,7 @@ file(GLOB includesmodule
 )
 find_package(CxxTest)
 if(CXXTEST_FOUND)
-    include_directories(${CXXTEST_INCLUDE_DIR} ${includesmodule}) 
+    include_directories(${CXXTEST_INCLUDE_DIR}) 
     enable_testing()
 
     CXXTEST_ADD_TEST(runner runner.cc 
@@ -58,9 +58,6 @@ endif()
 ###########################################################################
 # Build this project.
 FILE(GLOB_RECURSE thisproject-sources "${CMAKE_CURRENT_SOURCE_DIR}/build/*.cc")
-# ADD_LIBRARY (${PROJECT_NAME}lib-static STATIC ${thisproject-sources})
-# ADD_EXECUTABLE (${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/build/${PROJECT_NAME}.cc")
-# TARGET_LINK_LIBRARIES (${PROJECT_NAME} ${PROJECT_NAME}lib-static ${LIBRARIES}) 
 
 ###########################################################################
 # Install this project.

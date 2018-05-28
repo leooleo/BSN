@@ -1,11 +1,11 @@
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.5)
 
-PROJECT (test_bsn)
+PROJECT (runner)
 
 ###########################################################################
 # Set the search path for .cmake files.
 SET (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake.Modules" ${CMAKE_MODULE_PATH})
-find_package (Threads)
+
 get_filename_component(DIR_ONE_ABOVE ../ ABSOLUTE)
 
 # Add a local CMake module search path dependent on the desired installation destination.
@@ -26,48 +26,35 @@ INCLUDE (${CMAKE_CURRENT_SOURCE_DIR}/cmake.Modules/CompileFlags.cmake)
 SET(OPENDAVINCI_DIR "${CMAKE_INSTALL_PREFIX}")
 FIND_PACKAGE (OpenDaVINCI REQUIRED)
 
-###########################################################################
-# Set linking libraries to successfully link test suites and binaries.
-SET (LIBRARIES ${OPENDAVINCI_LIBRARIES}
-                ${BSN_LIBRARIES})
-
-###########################################################################
-# Set header files from OpenDaVINCI.
-INCLUDE_DIRECTORIES (${OPENDAVINCI_INCLUDE_DIRS})
-
-# Set header files from BSN.
-INCLUDE_DIRECTORIES (${BSN_INCLUDE_DIRS})
-
-###########################################################################
-# Collect all resource files.
-FILE(GLOB_RECURSE libbsn-sources "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+# Find BSN.
+SET(BSN_DIR "${CMAKE_INSTALL_PREFIX}")
+FIND_PACKAGE (BSN REQUIRED)
 
 ###########################################################################
 # Finding the CxxTest
 
-find_package(CxxTest)
 file(GLOB testheader
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
+"${CMAKE_SOURCE_DIR}/test/*.hpp"
 )
+add_subdirectory(bodyhub)
+add_subdirectory(sensornode)
 file(GLOB includesmodule
-    "${DIR_ONE_ABOVE}/module/bodyhub/include/"
+"${CMAKE_SOURCE_DIR}/*/include/"
 )
+find_package(CxxTest)
 if(CXXTEST_FOUND)
-    include_directories(${CXXTEST_INCLUDE_DIR}) 
+    include_directories(${CXXTEST_INCLUDE_DIR} ${includesmodule})
     enable_testing()
 
-    CXXTEST_ADD_TEST(test_bsn runner.cc 
+    CXXTEST_ADD_TEST(runner runner.cc 
                 ${testheader})
-    target_link_libraries(test_bsn ${BSN_LIBRARIES})
-endif(CXXTEST_FOUND) 
+    target_link_libraries(runner)
+endif() 
 
 ###########################################################################
 # Build this project.
 FILE(GLOB_RECURSE thisproject-sources "${CMAKE_CURRENT_SOURCE_DIR}/build/*.cc")
-# ADD_LIBRARY (${PROJECT_NAME}lib-static STATIC ${thisproject-sources})
-# ADD_EXECUTABLE (${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/build/${PROJECT_NAME}.cc")
-# TARGET_LINK_LIBRARIES (${PROJECT_NAME} ${PROJECT_NAME}lib-static ${LIBRARIES}) 
 
 ###########################################################################
 # Install this project.
-INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin COMPONENT test_bsn)
+INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin COMPONENT runner)

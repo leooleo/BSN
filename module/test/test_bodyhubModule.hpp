@@ -2,7 +2,7 @@
 #define TEST_BODYHUBMODULE_H
 
 #include <cxxtest/TestSuite.h>
-#include "module/bodyhub/include/BodyHubModule.hpp"
+#include "BodyHubModule.hpp"
 
 using namespace std;
   
