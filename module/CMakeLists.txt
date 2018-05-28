@@ -31,6 +31,11 @@ SET(BSN_DIR "${CMAKE_INSTALL_PREFIX}")
 FIND_PACKAGE (BSN REQUIRED)
 
 ###########################################################################
+# Set linking libraries to successfully link test suites and binaries.
+SET (LIBRARIES ${OPENDAVINCI_LIBRARIES}
+                ${BSN_LIBRARIES})
+
+###########################################################################
 # Finding the CxxTest
 
 file(GLOB testheader
@@ -44,11 +49,12 @@ file(GLOB includesmodule
 find_package(CxxTest)
 if(CXXTEST_FOUND)
     include_directories(${CXXTEST_INCLUDE_DIR} ${includesmodule})
+    INCLUDE_DIRECTORIES (${OPENDAVINCI_INCLUDE_DIRS})
     enable_testing()
 
     CXXTEST_ADD_TEST(runner runner.cc 
                 ${testheader})
-    target_link_libraries(runner)
+    target_link_libraries(runner ${CMAKE_CURRENT_SOURCE_DIR}/bodyhub/build/libbodyhublib-static.a ${BSN_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/sensornode/build/libsensornodelib-static.a ${OPENDAVINCI_LIBRARIES})
 endif() 
 
 ###########################################################################
