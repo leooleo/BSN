@@ -40,7 +40,7 @@ SET (LIBRARIES ${OPENDAVINCI_LIBRARIES}
 # Compiling tests
 
 file(GLOB testheader
-"${CMAKE_CURRENT_SOURCE_DIR}/test/*.hpp"
+"${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
 )
 file(GLOB includesmodule
 "${DIR_ONE_ABOVE}/include/include/bsn/entity/*.hpp"
@@ -51,7 +51,7 @@ if(CXXTEST_FOUND)
     enable_testing()
 
     CXXTEST_ADD_TEST(runner runner.cc 
-                ${CMAKE_CURRENT_SOURCE_DIR}/test_bodyhub.hpp)
+                ${testheader})
     target_link_libraries(runner ${BSN_LIBRARIES})
 endif() 
 
