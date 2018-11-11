@@ -23,29 +23,46 @@ const vector<string> split(const string& s, const char& c) {
 	return v;
 }
 
+/** Constructor of the class, sets the port.
+ * @param p Port number. 
+*/
 TCPReceive::TCPReceive(int p){    
     port = p;
 }
 
+/** Sets the port.
+ * @param p Port number.
+*/
 void TCPReceive::set_port(int p){
     port = p;
 }
 
+/** Returns the port number.
+ *  @return port Port number.
+*/
 int TCPReceive::get_port(){
     return port;
 }
 
+/** Starts the connection.
+ *  
+*/
 void TCPReceive::start_connection(){
     thread listener(&TCPReceive::initialize,this);
     listener.detach();
 }
 
+/** Handle a connection error.
+ * 
+*/
 void TCPReceive::handleConnectionError() {
-
     this_connection->stop();
     cout << "Connection terminated\n";
 }
 
+/** Gets a package in the buffer.
+ * @return p Package if the buffer is not empty, or a empty string if the buffer is empty.
+*/
 string TCPReceive::get_package() {
     string p;
     buffer_lock.lock();
@@ -61,6 +78,9 @@ string TCPReceive::get_package() {
     return p;
 }
 
+/** Prints the buffer of packages.
+*
+*/
 void TCPReceive::print_buffer() {
     buffer_lock.lock();
     cout << "\nBuffer " << buffer.size() << ':';
@@ -69,6 +89,9 @@ void TCPReceive::print_buffer() {
     buffer_lock.unlock();
 }
 
+/** Does a split by the char '*' and add this to the buffer.
+ * @param received_string Received string.
+*/
 void TCPReceive::nextString(const std::string &received_string) {
     // Realiza split pelo caracter separador escolhido. No caso '*'
     vector<string> vet = split(received_string,'*');
@@ -80,6 +103,9 @@ void TCPReceive::nextString(const std::string &received_string) {
 
 }
 
+/** Handle a new connection.
+ * @param connection 
+*/
 void TCPReceive::onNewConnection(std::shared_ptr<odcore::io::tcp::TCPConnection> connection) {
     if (connection.get()) {
         cout << "Handle a new connection." << endl;
@@ -93,10 +119,16 @@ void TCPReceive::onNewConnection(std::shared_ptr<odcore::io::tcp::TCPConnection>
     }
 }
 
+/** Stops the connection.
+ *  
+*/
 void TCPReceive::stop_connection(){
     should_run = false;
 }
 
+/** Initialize a server.
+ * 
+*/
 void TCPReceive::initialize(){
     cout << "Server listening on port " << get_port() << endl;    
     should_run = true;
