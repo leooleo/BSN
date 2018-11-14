@@ -127,7 +127,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataCollectorModule::b
             std::cout<< "Recebi a nova frequencia: " << freq << endl; 
         }
 
-        if(++nCycles >= freq){
+        // if(++nCycles >= freq){
             string now_time = time_data.get_time();
             cout << "Estado atual: " << markov_generator.current_state << endl;
             mGeneratedData = markov_generator.calculate_state();      
@@ -146,7 +146,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataCollectorModule::b
 
             nCycles = 0;
             std::cout << "Dado " << mGeneratedData << " gerado e enviado pelo sensor: " << sensorType << std::endl;
-        }
+        // }
     }
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
