@@ -46,6 +46,9 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
     int sensor_id;
     double evaluated_packet;
 
+    ofstream myfile;
+    myfile.open ("look.txt");
+
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING){
 
         while(!data_buffer.isEmpty()){
@@ -55,7 +58,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
             data = container.getData<SensorData>().getSensorData();
             times = container.getData<SensorData>().getTimes();
 
-            sensor_id = get_sensor_id(types[0]);
+            sensor_id = get_sensor_id(types[0]);            
 
             if (types[0] == "bpms" or types[0] == "bpmd") {
          	// O mais discrepante é o que conta(Guideline brasileiro)
@@ -73,7 +76,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
 		        packets_received[sensor_id].push_back(evaluated_packet);
 		        print_packs();
 
-                data_fuse(packets_received);
+                myfile << data_fuse(packets_received) << endl;
             }
 
 			/*
@@ -86,6 +89,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
         }
 
     }
+    myfile.close();
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }

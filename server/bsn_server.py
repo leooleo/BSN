@@ -13,13 +13,42 @@ class Process:
 app = Flask(__name__)
 app_processes  = []
 
-thermometer = [         
-    ['./../odv/centralhub/listener/build/tcp_listenerApp', '--cid=113', '--id=8080'],
-    ['./../odv/centralhub/processor/build/ProcessorApp', '--cid=113'],
+thermometer = [             
     ['odsupercomponent','--cid=112'],
     ['./../odv/sensornode/collector/build/DataCollectorApp', '--cid=112'],    
     ['./../odv/sensornode/filter/build/Filter',              '--cid=112'],
-    ['./../odv/sensornode/sender/build/SenderApp', '--cid=112', '--id=8080']   
+    ['./../odv/sensornode/sender/build/SenderApp', '--cid=112', '--id=8080']
+]
+
+oximeter = [             
+    ['odsupercomponent','--cid=113'],
+    ['./../odv/sensornode/collector/build/DataCollectorApp', '--cid=113'],    
+    ['./../odv/sensornode/filter/build/Filter',              '--cid=113'],
+    ['./../odv/sensornode/sender/build/SenderApp', '--cid=113', '--id=8081']
+]
+
+sphygmomanometer = [
+    ['odsupercomponent','--cid=114'],
+    ['./../odv/sensornode/collector/build/DataCollectorApp', '--cid=114', '--id=0'],    
+    ['./../odv/sensornode/collector/build/DataCollectorApp', '--cid=114', '--id=1'],
+    ['./../odv/sensornode/filter/build/Filter',              '--cid=114'],
+    ['./../odv/sensornode/sender/build/SenderApp', '--cid=114', '--id=8082']
+]
+
+ecg = [
+    ['odsupercomponent','--cid=115'],
+    ['./../odv/sensornode/collector/build/DataCollectorApp', '--cid=115'],    
+    ['./../odv/sensornode/filter/build/Filter',              '--cid=115'],
+    ['./../odv/sensornode/sender/build/SenderApp', '--cid=115', '--id=8083']
+]
+
+centralhub = [
+    ['odsupercomponent','--cid=116'],
+    ['./../odv/centralhub/listener/build/tcp_listenerApp', '--cid=116', '--id=8080'],
+    ['./../odv/centralhub/listener/build/tcp_listenerApp', '--cid=116', '--id=8081'],
+    ['./../odv/centralhub/listener/build/tcp_listenerApp', '--cid=116', '--id=8082'],
+    ['./../odv/centralhub/listener/build/tcp_listenerApp', '--cid=116', '--id=8083'],
+    ['./../odv/centralhub/processor/build/ProcessorApp', '--cid=116']
 ]
 
 def id_status(pid):
@@ -37,13 +66,25 @@ def execute_process(commands, father_name):
     global app_processes
     for command in commands:
         # Abre em uma thread os processos requisitados
-        if(command[0] == 'odsupercomponent'):
+        if(command[0] == 'odsupercomponent' and father_name != 'centralhub'):
+            # Para os supercomponents do sensornode
             path = os.getcwd().rsplit('/', 1)[0] + '/odv/sensornode/configs/' + father_name
             p = subprocess.Popen(command, stdout=subprocess.PIPE, cwd=path)
+
+        elif(command[0] == 'odsupercomponent' and father_name == 'centralhub'):
+            # Para os supercomponents do centralhub
+            path = os.getcwd().rsplit('/', 1)[0] + '/odv/centralhub/configs/'
+            p = subprocess.Popen(command, stdout=subprocess.PIPE, cwd=path)
+
         else:            
             p = subprocess.Popen(command, stdout=subprocess.PIPE)
-        # Coloca nos processos ativos os ids dos mesmos            
-        app_processes.append(Process(p.pid,command[0] + ' ' + command[1], father_name))
+        # Coloca nos processos ativos os ids dos mesmos
+        if(command[0] != 'odsupercomponent'):
+            name = command[0].rsplit('/',1)[1]
+        else: 
+            name = command[0]            
+            
+        app_processes.append(Process(p.pid,name, father_name))
 
 
 @app.route('/status')
@@ -63,7 +104,11 @@ def bsn():
     order = request.args.get('order','')
     if order == 'start':
         app_processes = []
+        execute_process(centralhub, 'centralhub')
+        execute_process(sphygmomanometer, 'sphygmomanometer')
         execute_process(thermometer, 'thermometer')
+        execute_process(oximeter, 'oximeter')
+        execute_process(ecg, 'ecg')
         current_processes = ' '.join(str(x.pid) for x in app_processes)
         return 'bsn started the processes ' + current_processes
 
