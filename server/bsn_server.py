@@ -14,10 +14,12 @@ app = Flask(__name__)
 app_processes  = []
 
 thermometer = [         
+    ['./../odv/centralhub/listener/build/tcp_listenerApp', '--cid=113', '--id=8080'],
+    ['./../odv/centralhub/processor/build/ProcessorApp', '--cid=113'],
     ['odsupercomponent','--cid=112'],
     ['./../odv/sensornode/collector/build/DataCollectorApp', '--cid=112'],    
     ['./../odv/sensornode/filter/build/Filter',              '--cid=112'],
-    ['./../odv/sensornode/sender/build/SenderApp', '--cid=112', '--id=8080']
+    ['./../odv/sensornode/sender/build/SenderApp', '--cid=112', '--id=8080']   
 ]
 
 def id_status(pid):
