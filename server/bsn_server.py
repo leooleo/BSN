@@ -11,14 +11,13 @@ class Process:
         self.father = father        
 
 app = Flask(__name__)
-app.secret_key = b'**alksjflak1224812798##%%$$$$'
 app_processes  = []
 
-oximeter = [         
-    ['odsupercomponent', '--cid=112'],
-    ['./DataCollectorApp.out', '--cid=112'],    
-    ['./Filter.out',                 '--cid=112'],
-    ['./SenderApp.out', '--cid=112', '--id=8080']
+thermometer = [         
+    ['odsupercomponent','--cid=112'],
+    ['./../odv/sensornode/collector/build/DataCollectorApp', '--cid=112'],    
+    ['./../odv/sensornode/filter/build/Filter',              '--cid=112'],
+    ['./../odv/sensornode/sender/build/SenderApp', '--cid=112', '--id=8080']
 ]
 
 def id_status(pid):
@@ -32,13 +31,17 @@ def id_status(pid):
         else:
             return('active')
 
-def execute_process(commands):
+def execute_process(commands, father_name):
     global app_processes
     for command in commands:
         # Abre em uma thread os processos requisitados
-        p = subprocess.Popen(command, stdout=subprocess.PIPE)
+        if(command[0] == 'odsupercomponent'):
+            path = os.getcwd().rsplit('/', 1)[0] + '/odv/sensornode/configs/' + father_name
+            p = subprocess.Popen(command, stdout=subprocess.PIPE, cwd=path)
+        else:            
+            p = subprocess.Popen(command, stdout=subprocess.PIPE)
         # Coloca nos processos ativos os ids dos mesmos            
-        app_processes.append(Process(p.pid,command[0] + ' ' + command[1], 'oximeter'))
+        app_processes.append(Process(p.pid,command[0] + ' ' + command[1], father_name))
 
 
 @app.route('/status')
@@ -53,12 +56,12 @@ def get_status():
 
 @app.route('/bsn')
 def bsn():
-    global oximeter, app_processes
+    global thermometer, app_processes
 
     order = request.args.get('order','')
     if order == 'start':
         app_processes = []
-        execute_process(oximeter)
+        execute_process(thermometer, 'thermometer')
         current_processes = ' '.join(str(x.pid) for x in app_processes)
         return 'bsn started the processes ' + current_processes
 
@@ -68,16 +71,14 @@ def bsn():
             return 'App has no processes running'
 
         # Mata todos os processos ativos do app        
-        for process in app_processes:
-            # process.kill()            
+        for process in app_processes:    
             try :
-                os.kill(process.pid, signal.SIGKILL)            
+                os.kill(process.pid, signal.SIGKILL)
             except:
                 continue
 
-        current_processes = ' '.join(str(x.pid) for x in app_processes)           
-        # # Limpa a lista dos processos ativos
-        # app_processes = []
+        current_processes = ' '.join(str(x.pid) for x in app_processes)
+
         return 'bsn stopped the processes ' + current_processes
 
 @app.route('/')

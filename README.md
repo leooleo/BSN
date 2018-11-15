@@ -72,6 +72,16 @@ E o módulo sensor(Na pasta sensor/build):
 
 Nesta configuração o protótipo será executado com uma plataforma central, três sensores (termômetro, eletrocardiógrafo e oxímetro). O modo de escalonamento do odsupercomponent será First Come Fist Served (FCFS) com sincronização dos módulos com a frequência de 10Hz.
 
+### Servidor remoto
+Caso deseje usar o servidor remoto primeiro crie um ambiente virtual:
+```
+python3 -m venv venv
+source venv/bin/activate
+```
+Instale as dependências do sistema:
+```
+pip install -r requirements.txt
+```
 ## Configurações de teste
 
 * Sistema Operacional - Linux Ubuntu 16.04
