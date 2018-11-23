@@ -48,3 +48,8 @@ levi.sh
 
 # python virtual environment
 venv
+# Doxygen documentation
+docs/doxygen
+
+# Experiments data
+*.csv
