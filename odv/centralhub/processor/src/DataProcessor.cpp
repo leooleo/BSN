@@ -11,7 +11,9 @@ using namespace odcore::data;
 using namespace odcore::base;
 using namespace odcore::base::module;
 using namespace bsn::configuration;
+using namespace bsn::communication;
 
+TCPSend sender(8000);
 
 DataProcessor::DataProcessor(const int32_t &argc, char **argv) :
 TimeTriggeredConferenceClientModule(argc, argv, "DataProcessor"),
@@ -56,6 +58,10 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
     ofstream myfile;
     myfile.open ("look.txt");
 
+    sender.set_port(6060);
+    sender.setIP("localhost");
+    sender.connect();
+
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING){
 
         while(!data_buffer.isEmpty()){
@@ -84,6 +90,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
 		        print_packs();
 
                 patient_status = data_fuse(packets_received);
+                sender.send(to_string(patient_status));
             }
 
 			/*
