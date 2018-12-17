@@ -18,6 +18,7 @@ TCPSend sender(8000);
 DataProcessor::DataProcessor(const int32_t &argc, char **argv) :
 TimeTriggeredConferenceClientModule(argc, argv, "DataProcessor"),
 	packets_received(number_sensors),
+    raw_packets(number_sensors),
 	data_buffer() {}
 	
 DataProcessor::~DataProcessor() {}
@@ -28,6 +29,12 @@ void DataProcessor::setUp() {
     //initialize packets_received
     for(std::vector<std::list<double>>::iterator it = packets_received.begin();
             it != packets_received.end(); ++it) {
+                (*it).push_back(0.0);
+    }
+
+    //initialize packets_raw
+    for(std::vector<std::list<double>>::iterator it = raw_packets.begin();
+            it != raw_packets.end(); ++it) {
                 (*it).push_back(0.0);
     }
 }
@@ -47,16 +54,15 @@ void DataProcessor::print_packs(){
 }
 
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
-    Container container;    
+    Container container;
+    
     array<string, 2> types;
     array<double, 4> data;
     array<string, 8> times;
     int32_t sensor_id;
     double evaluated_packet;
+    double raw_packet;
     double patient_status;
-
-    ofstream myfile;
-    myfile.open ("look.txt");
 
     sender.set_port(6060);
     sender.setIP("localhost");
@@ -76,27 +82,37 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
             if (types[0] == "bpms" or types[0] == "bpmd") {
          	// O mais discrepante é o que conta(Guideline brasileiro)
          		evaluated_packet = max(data[1],data[3]);
-                if (evaluated_packet == data[3])
+                if (evaluated_packet == data[3]){
                     sensor_id = get_sensor_id(types[1]); 
+                    raw_packet = data[2];
+                }
+                    
             }
             else {
          	// Para os sensores que não são de pressão
         		evaluated_packet = data[1];
+                raw_packet = data[0];
             }
 
             // Se o pacote for válido...
             if (evaluated_packet != -1) {                
 		        packets_received[sensor_id].push_back(evaluated_packet);
+                raw_packets[sensor_id].push_back(raw_packet);
 		        print_packs();
                 
                 string packet = "";
-                for(auto li : packets_received){
-                    if(!li.empty()) {
-                        double element = li.front();
-                        packet += to_string(element) + "/";
-                    }                    
+                for(unsigned int i = 0; i < packets_received.size(); i++){
+                    auto evaluated_list = packets_received[i];
+                    auto raw_list = raw_packets[i];
+                    if(!evaluated_list.empty() ){
+                        double element = evaluated_list.front();
+                        double raw_element = raw_list.front();
+                        packet += to_string(element) + '=' + to_string(raw_element)  + "/";
+                    }
+
                 }
-                patient_status = data_fuse(packets_received);
+
+                patient_status = data_fuse(packets_received, raw_packets);
                 packet += to_string(patient_status);
                 sender.send(packet);
             }
@@ -154,7 +170,6 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
         }
 
     }
-    myfile.close();
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }

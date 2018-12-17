@@ -39,18 +39,29 @@ class RangesTestSuite : public CxxTest::TestSuite {
     void test_data_fuse() {
         cout << "\tTestando metodo data_fuse:\n";
         vector<list<double>> vet(3);
+        vector<list<double>> raw_vet(3);
         vector<list<double>> empty(3);
-        TS_ASSERT_EQUALS(-1, data_fuse(vet));
+        TS_ASSERT_EQUALS(-1, data_fuse(vet,raw_vet));
         vet[0].push_back(0.75);
         vet[1].push_back(0.60);
 
         vet[0].push_back(0.10);
         vet[1].push_back(0.20);        
+
+        raw_vet[0].push_back(2);
+        raw_vet[1].push_back(2);
+
+        raw_vet[0].push_back(1);
+        raw_vet[1].push_back(1);      
+
         //data_fuse
-        TS_ASSERT_EQUALS(-1, data_fuse(empty));
-        TS_ASSERT_EQUALS(0.675, data_fuse(vet));        
+        TS_ASSERT_EQUALS(-1, data_fuse(empty,raw_vet));
+        TS_ASSERT_EQUALS(0.675, data_fuse(vet,raw_vet));        
         TS_ASSERT_EQUALS(0.1, vet[0].front());
         TS_ASSERT_EQUALS(0.2, vet[1].front());
+
+        TS_ASSERT_EQUALS(1, raw_vet[0].front());
+        TS_ASSERT_EQUALS(1, raw_vet[1].front());
     }
 	
 };

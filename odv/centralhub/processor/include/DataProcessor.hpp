@@ -43,6 +43,7 @@ class DataProcessor : public odcore::base::module::TimeTriggeredConferenceClient
 
     private:
         std::vector<std::list<double>> packets_received;
+        std::vector<std::list<double>> raw_packets;
         odcore::base::FIFOQueue data_buffer;
 };
 

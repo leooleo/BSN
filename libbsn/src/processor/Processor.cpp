@@ -42,7 +42,7 @@ namespace bsn {
             return available;
         }
 
-        double data_fuse(vector<list<double>> &packetsReceived) {	
+        double data_fuse(vector<list<double>> &packetsReceived, vector<list<double>> &packetsRaw) {	
             double average, risk_status;
             int32_t count = 0;
             average = 0;
@@ -51,7 +51,10 @@ namespace bsn {
             if(!available_to_process(packetsReceived))
                 return -1;
             
-            for(auto &packet_list : packetsReceived){
+            
+            for(unsigned int i = 0; i < packetsReceived.size(); i++){
+                auto &packet_list = packetsReceived[i];
+                auto &raw_list = packetsRaw[i];
                 if(!packet_list.empty()) {
                     // Soma à média e retira da fila
                     double first_packet = packet_list.front();
@@ -61,6 +64,8 @@ namespace bsn {
                     // Mais outros para serem processados
                     if(packet_list.size() > 1) {
                         packet_list.pop_front();
+                        raw_list.pop_front();
+                        
                     }
                     if(first_packet != 0){
                         count++;
