@@ -44,10 +44,10 @@ ecg = [
 
 centralhub = [
     ['odsupercomponent','--cid=116'],
-    ['./../odv/centralhub/listener/build/tcp_listenerApp', '--cid=116', '--id=8080'],
-    ['./../odv/centralhub/listener/build/tcp_listenerApp', '--cid=116', '--id=8081'],
-    ['./../odv/centralhub/listener/build/tcp_listenerApp', '--cid=116', '--id=8082'],
-    ['./../odv/centralhub/listener/build/tcp_listenerApp', '--cid=116', '--id=8083'],
+    ['./../odv/centralhub/listener/build/ListenerApp', '--cid=116', '--id=8080'],
+    ['./../odv/centralhub/listener/build/ListenerApp', '--cid=116', '--id=8081'],
+    ['./../odv/centralhub/listener/build/ListenerApp', '--cid=116', '--id=8082'],
+    ['./../odv/centralhub/listener/build/ListenerApp', '--cid=116', '--id=8083'],
     ['./../odv/centralhub/processor/build/ProcessorApp', '--cid=116']
 ]
 

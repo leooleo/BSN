@@ -54,16 +54,22 @@ namespace bsn {
             for(auto &packet_list : packetsReceived){
                 if(!packet_list.empty()) {
                     // Soma à média e retira da fila
-                    average += packet_list.front();
+                    double first_packet = packet_list.front();
+                    average += first_packet;
                     
                     // Descarta o pacote processado se existem
                     // Mais outros para serem processados
                     if(packet_list.size() > 1) {
                         packet_list.pop_front();
-                    }			
-                    count++;
+                    }
+                    if(first_packet != 0){
+                        count++;
+                    }                    
                 }
-            }	
+            }
+            if(count == 0){
+                count = 1;
+            }
             // Calcula a media partir da soma dividida pelo número de pacotes lidos
             risk_status = (average / count);
             // Status de risco do paciente dado em porcentagem

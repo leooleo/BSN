@@ -88,9 +88,17 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
             if (evaluated_packet != -1) {                
 		        packets_received[sensor_id].push_back(evaluated_packet);
 		        print_packs();
-
+                
+                string packet = "";
+                for(auto li : packets_received){
+                    if(!li.empty()) {
+                        double element = li.front();
+                        packet += to_string(element) + "/";
+                    }                    
+                }
                 patient_status = data_fuse(packets_received);
-                sender.send(to_string(patient_status));
+                packet += to_string(patient_status);
+                sender.send(packet);
             }
 
 			/*
