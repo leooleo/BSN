@@ -11,7 +11,9 @@ using namespace odcore::data;
 using namespace odcore::base;
 using namespace odcore::base::module;
 using namespace bsn::configuration;
+using namespace bsn::communication;
 
+TCPSend sender(8000);
 
 DataProcessor::DataProcessor(const int32_t &argc, char **argv) :
 TimeTriggeredConferenceClientModule(argc, argv, "DataProcessor"),
@@ -53,6 +55,13 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
     double evaluated_packet;
     double patient_status;
 
+    ofstream myfile;
+    myfile.open ("look.txt");
+
+    sender.set_port(6060);
+    sender.setIP("localhost");
+    sender.connect();
+
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING){
 
         while(!data_buffer.isEmpty()){
@@ -62,7 +71,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
             data = container.getData<SensorData>().getSensorData();
             times = container.getData<SensorData>().getTimes();
 
-            sensor_id = get_sensor_id(types[0]);
+            sensor_id = get_sensor_id(types[0]);            
 
             if (types[0] == "bpms" or types[0] == "bpmd") {
          	// O mais discrepante é o que conta(Guideline brasileiro)
@@ -79,8 +88,17 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
             if (evaluated_packet != -1) {                
 		        packets_received[sensor_id].push_back(evaluated_packet);
 		        print_packs();
-
+                
+                string packet = "";
+                for(auto li : packets_received){
+                    if(!li.empty()) {
+                        double element = li.front();
+                        packet += to_string(element) + "/";
+                    }                    
+                }
                 patient_status = data_fuse(packets_received);
+                packet += to_string(patient_status);
+                sender.send(packet);
             }
 
 			/*
@@ -136,6 +154,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
         }
 
     }
+    myfile.close();
 
     return odcore::data::dmcp::ModuleExitCodeMessage::OKAY;
 }

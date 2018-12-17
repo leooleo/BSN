@@ -46,6 +46,8 @@ test.cpp
 *.txt
 levi.sh
 
+# python virtual environment
+venv
 # Doxygen documentation
 docs/doxygen
 
