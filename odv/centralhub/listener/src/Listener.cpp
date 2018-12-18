@@ -29,12 +29,15 @@ void TimeTriggeredSender::tearDown() {
 odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode TimeTriggeredSender::body() {
     vector<string> splitted_package;
     Operation op;
+
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) {
         array<string, 2> types = {{"none", "none"}};
         array<double, 4> data = {{-1.0, -1.0, -1.0, -1.0}};
         array<string, 8> times = {{"none", "none", "none", "none", "none", "none", "none", "none"}};
-        vector<string> aux, d, t;
+        vector<string> aux, d, t, b;
         string package = server.get_package();
+        double sensorBatteryLevel = 777.0;
+
         if(package != ""){            
             cout << "Pacote: \'" << package << endl;
             splitted_package = op.split(package, '/');
@@ -53,17 +56,23 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode TimeTriggeredSender::b
                     data[x + j] = stod(d[x]);
                 }
                 
+                cout << aux[0] << " " << aux[1] << endl;
+
                 j = d.size();
-                t = op.split(aux[1], ',');
+                b = op.split(aux[1], '~');
+                t = op.split(b[0], ',');
 
                 for (uint32_t x = 0; x < t.size(); x++) {
                     times[x + k] = t[x]; 
                 }
 
                 k = t.size();
+
+                sensorBatteryLevel = stod(b[1]);
             }
 
-            SensorData sensor_data(types,data,times);
+
+            SensorData sensor_data(types,data,times, sensorBatteryLevel);
             Container c(sensor_data);
             getConference().send(c);
             
@@ -75,6 +84,7 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode TimeTriggeredSender::b
             getConference().send(rUpdContainer);
             
             cout << "\' recebido e encaminhado para o processamento." << endl;            
+            
         }
     }
 

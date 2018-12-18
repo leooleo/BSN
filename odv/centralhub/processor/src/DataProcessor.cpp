@@ -19,12 +19,14 @@ DataProcessor::DataProcessor(const int32_t &argc, char **argv) :
 TimeTriggeredConferenceClientModule(argc, argv, "DataProcessor"),
 	packets_received(number_sensors),
     raw_packets(number_sensors),
-	data_buffer() {}
+	data_buffer(),
+    lifo_buffer() {}
 	
 DataProcessor::~DataProcessor() {}
 
 void DataProcessor::setUp() {
     addDataStoreFor(873, data_buffer);
+    addDataStoreFor(881, lifo_buffer);
 
     //initialize packets_received
     for(std::vector<std::list<double>>::iterator it = packets_received.begin();
@@ -63,6 +65,8 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
     double evaluated_packet;
     double raw_packet;
     double patient_status;
+    double batteryLevel = 777.0;
+    double sensorBatteryLevel = 777.0;
 
     sender.set_port(6060);
     sender.setIP("localhost");
@@ -76,8 +80,18 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataProcessor::body(){
             types = container.getData<SensorData>().getSensorType();
             data = container.getData<SensorData>().getSensorData();
             times = container.getData<SensorData>().getTimes();
+            sensorBatteryLevel = container.getData<SensorData>().getBatteryLevel();
 
-            sensor_id = get_sensor_id(types[0]);            
+            if (!lifo_buffer.isEmpty()) {
+                Container container2 = lifo_buffer.pop();
+                batteryLevel = container2.getData<BatteryLevel>().getUnits();
+                batteryLevel = batteryLevel - 0.01;
+            }
+
+            cout << "sensorBatteryLevel: " << sensorBatteryLevel << endl;
+            cout << "batteryLevel: " << batteryLevel << endl;
+
+            sensor_id = get_sensor_id(types[0]);
 
             if (types[0] == "bpms" or types[0] == "bpmd") {
          	// O mais discrepante é o que conta(Guideline brasileiro)

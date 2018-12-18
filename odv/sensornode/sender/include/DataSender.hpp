@@ -10,12 +10,14 @@
 #include <stdint.h>
 
 #include "opendavinci/odcore/base/FIFOQueue.h"
+#include "opendavinci/odcore/base/LIFOQueue.h"
 #include "opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h"
 #include "bsn/data/FilteredData.h"
 #include "bsn/communication/TCPSend.hpp"
 #include "bsn/time/TimeData.hpp"
 #include "bsn/data/ResourceUpdate.h"
 #include "bsn/data/SensorStatusInfo.h"
+#include "bsn/data/BatteryLevel.h"
 #include "bsn/configuration/SensorConfiguration.hpp"
 #include "bsn/operation/Operation.hpp"
 
@@ -40,6 +42,7 @@ class DataSender : public odcore::base::module::TimeTriggeredConferenceClientMod
 
     private:
         odcore::base::FIFOQueue mBuffer;
+        odcore::base::LIFOQueue mLifoBuffer;
         std::string ip;
         std::map<std::string, std::map<std::string, bsn::range::Range>> configsMap;
         std::vector<bsn::configuration::SensorConfiguration> configsVet;

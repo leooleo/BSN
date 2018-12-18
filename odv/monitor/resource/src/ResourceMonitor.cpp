@@ -50,6 +50,12 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode ResourceMonitor::body(
             Container rInfoContainer(rInfo);
             getConference().send(rInfoContainer);
 
+            if (mResource.getName() == "Battery") {
+                BatteryLevel rBatteryLvl(mResource.getCurrentLevel());
+                Container rLevelContainer(rBatteryLvl);
+                getConference().send(rLevelContainer);
+            }
+
             /* For message debugging
             std::cout << "\nMessage sent:" << endl;
             std::cout << "------------------------------------------" << endl;

@@ -19,7 +19,7 @@ namespace bsn {
         
             public:
                 //construtor parametrizado
-                SensorData(const std::array<std::string, 2> &, const std::array<double, 4> &, const std::array<std::string, 8> &);
+                SensorData(const std::array<std::string, 2> &, const std::array<double, 4> &, const std::array<std::string, 8> &, double);
  
                 SensorData(); // construtor
                 virtual ~SensorData();// destrutor 
@@ -54,11 +54,15 @@ namespace bsn {
 
                 void setTimes(const std::array<std::string, 8>);
                 std::array<std::string, 8> getTimes() const;
+
+                void setBatteryLevel(const double);
+                double getBatteryLevel() const;
             
             private:
                 std::array<std::string, 2> sensorType; // tipo do sensor
                 std::array<double, 4> sensorData; // estado do sensor
                 std::array<std::string, 8> times;  // instante de geração do dado
+                double batteryLevel;
         };
     }
 }

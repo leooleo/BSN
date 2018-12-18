@@ -13,12 +13,13 @@ namespace bsn {
         
         using namespace std;
 
-        SensorData::SensorData() : sensorType(), sensorData(), times() {}
+        SensorData::SensorData() : sensorType(), sensorData(), times(), batteryLevel() {}
         
-        SensorData::SensorData(const array<string, 2> &type, const array<double, 4> &data, const array<string, 8> &t) : 
+        SensorData::SensorData(const array<string, 2> &type, const array<double, 4> &data, const array<string, 8> &t, double bl) : 
             sensorType(type),
             sensorData(data),
-            times(t) {}
+            times(t),
+            batteryLevel(bl) {}
         
         SensorData::~SensorData() {}
         
@@ -26,12 +27,14 @@ namespace bsn {
             SerializableData(),
             sensorType(obj.getSensorType()),
             sensorData(obj.getSensorData()),
-            times(obj.getTimes()) {}
+            times(obj.getTimes()),
+            batteryLevel(obj.getBatteryLevel()) {}
         
         SensorData& SensorData::operator=(const SensorData &obj) {
             sensorType = obj.getSensorType();
             sensorData = obj.getSensorData();
-            times = obj.getTimes();           
+            times = obj.getTimes();
+            batteryLevel = obj.getBatteryLevel();         
             return (*this);
         }
         
@@ -79,6 +82,14 @@ namespace bsn {
             return times;
         }
 
+        void SensorData::setBatteryLevel(const double b) {
+            batteryLevel = b;
+        }
+
+        double SensorData::getBatteryLevel() const {
+            return batteryLevel;
+        }
+
         ostream& SensorData::operator<<(ostream &out) const {
             odcore::serialization::SerializationFactory& sf=odcore::serialization::SerializationFactory::getInstance();
             std::shared_ptr<odcore::serialization::Serializer> s = sf.getQueryableNetstringsSerializer(out);
@@ -99,6 +110,8 @@ namespace bsn {
             s->write(12, times[5]);
             s->write(13, times[6]);
             s->write(14, times[7]);
+
+            s->write(15, batteryLevel);
 
             return out;
         }
@@ -123,6 +136,8 @@ namespace bsn {
             d->read(12, times[5]);
             d->read(13, times[6]);
             d->read(14, times[7]);
+
+            d->read(15, batteryLevel);
 
             return in;
         }

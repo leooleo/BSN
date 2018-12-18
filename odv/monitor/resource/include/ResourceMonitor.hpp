@@ -8,6 +8,7 @@
 
 #include "bsn/data/ResourceUpdate.h"
 #include "bsn/data/ResourceInfo.h"
+#include "bsn/data/BatteryLevel.h"
 #include "bsn/resource/Resource.hpp"
 
 class ResourceMonitor : public odcore::base::module::TimeTriggeredConferenceClientModule{

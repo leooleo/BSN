@@ -11,6 +11,7 @@
 
 #include "opendavinci/odcore/base/module/TimeTriggeredConferenceClientModule.h"
 #include "opendavinci/odcore/base/FIFOQueue.h"
+#include "opendavinci/odcore/base/LIFOQueue.h"
 
 #include "bsn/configuration/SensorConfiguration.hpp"
 #include "bsn/operation/Operation.hpp"
@@ -18,6 +19,7 @@
 #include "bsn/data/SensorData.h"
 #include "bsn/range/Range.hpp"
 #include "bsn/data/ResourceUpdate.h"
+#include "bsn/data/BatteryLevel.h"
 #include "bsn/data/PatientStatusInfo.h"
 #include "bsn/communication/TCPSend.hpp"
 
@@ -45,6 +47,7 @@ class DataProcessor : public odcore::base::module::TimeTriggeredConferenceClient
         std::vector<std::list<double>> packets_received;
         std::vector<std::list<double>> raw_packets;
         odcore::base::FIFOQueue data_buffer;
+        odcore::base::LIFOQueue lifo_buffer;
 };
 
 #endif 

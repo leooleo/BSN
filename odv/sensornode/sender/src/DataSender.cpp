@@ -14,6 +14,7 @@ using namespace std;
 DataSender::DataSender(const int32_t &argc, char **argv) :
     TimeTriggeredConferenceClientModule(argc, argv, "datasender"),
     mBuffer(),
+    mLifoBuffer(),
     ip("localhost"),
     configsMap(),
     configsVet() {}
@@ -82,6 +83,8 @@ void DataSender::setUp() {
 
     // Recebe FilteredData
     addDataStoreFor(876, mBuffer);
+
+    addDataStoreFor(881, mLifoBuffer);
     // Conecta o sender em uma porta
     sender.set_port(getIdentifier());
     sender.setIP(ip);
@@ -98,15 +101,23 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataSender::body(){
     bool isOK = false;
     TimeData time_data;
     string package;
-    string last_time, now_time;   
+    string last_time, now_time;
+    double batteryLevel = 777.0;
 
     while (getModuleStateAndWaitForRemainingTimeInTimeslice() == odcore::data::dmcp::ModuleStateMessage::RUNNING) { 
 
         while (!mBuffer.isEmpty()) {            
-            Container container = mBuffer.leave();
-            data = container.getData<FilteredData>().getSensorData();
-            type = container.getData<FilteredData>().getSensorType();
-            last_time = container.getData<FilteredData>().getTime();
+            Container container1 = mBuffer.leave();
+            data = container1.getData<FilteredData>().getSensorData();
+            type = container1.getData<FilteredData>().getSensorType();
+            last_time = container1.getData<FilteredData>().getTime();
+
+            if (!mLifoBuffer.isEmpty()) {
+                Container container2 = mLifoBuffer.pop();
+                batteryLevel = container2.getData<BatteryLevel>().getUnits();
+                batteryLevel = batteryLevel - 0.02;
+            }
+
             now_time = last_time + ',' + time_data.get_time();
 
             std::cout << "Dado recebido de um " << type << ": " << data << std::endl;                        
@@ -124,6 +135,9 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataSender::body(){
                 package += '$';
                 package += now_time + ',' + time_data.get_time();
 
+                package += '~';
+                package += to_string(batteryLevel);
+
                 // Add o separador de pacote
                 package += '/';
             }
@@ -139,7 +153,10 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataSender::body(){
                 // Adiciona os timestamps                
                 package += '$';
                 package += now_time + ',' + time_data.get_time();
-                
+
+                package += '~';
+                package += to_string(batteryLevel);
+
                 sender.send(package);
                 cout << package << endl;
             }
@@ -151,12 +168,14 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataSender::body(){
                 package += '-';
                 package += to_string(data) + '&';
                 package += to_string(evaluated);
-
                 
                 // Adiciona os timestamps                
                 package += '$';
                 package += now_time + ',' + time_data.get_time();
-                
+
+                package += '~';
+                package += to_string(batteryLevel);
+
                 sender.send(package);
                 cout << package << endl;
             }
