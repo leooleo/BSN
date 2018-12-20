@@ -22,6 +22,9 @@ datacollectormodule.2to0 = 0
 datacollectormodule.2to1 = 25
 datacollectormodule.2to2 = 75
 
+# Accuracy of ECG in percentage
+datacollectormodule.accuracy = 95
+
 datasender.ip = localhost
 
 datasender.lowPercentage = 0,20

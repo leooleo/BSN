@@ -14,7 +14,8 @@ DataCollectorModule::DataCollectorModule(const int32_t &argc, char **argv) :
     mGeneratedData(), 
     timeRef{},
     markovTransitions(),
-    rangesArray() {}
+    rangesArray(),
+    sensorAccuracy() {}
 
 DataCollectorModule::~DataCollectorModule() {}
 
@@ -54,7 +55,8 @@ void DataCollectorModule::setUp() {
         k += 2;
     }
 
-  
+    sensorAccuracy = getKeyValueConfiguration().getValue<double>("datacollectormodule.accuracy") / 100;
+
     lrs = operation.split(getKeyValueConfiguration().getValue<string>("global." + sensorType + "LowRisk"), ',');
     mrs0 = operation.split(getKeyValueConfiguration().getValue<string>("global." + sensorType + "MidRisk0"), ',');
     hrs0 = operation.split(getKeyValueConfiguration().getValue<string>("global." + sensorType + "HighRisk0"), ',');
@@ -125,6 +127,17 @@ odcore::data::dmcp::ModuleExitCodeMessage::ModuleExitCode DataCollectorModule::b
             cout << "Estado atual: " << markovGenerator.currentState << endl;
             mGeneratedData = markovGenerator.calculate_state();      
             markovGenerator.next_state();
+
+            // Simulando a accuracy do sensor
+            cout << "Dado gerado sem aplicar a accuracy de " << sensorAccuracy << ": " << mGeneratedData << endl; 
+            srand(time(NULL));
+            double accuracyValue = sensorAccuracy + (double)rand() / RAND_MAX * (1 - sensorAccuracy);
+            double offset = (1 - accuracyValue) * mGeneratedData;
+
+            if (rand()%2 == 0)
+                mGeneratedData = mGeneratedData + offset;
+            else
+                mGeneratedData = mGeneratedData - offset;
 
             RawData rawdata(mGeneratedData, sensorType, now_time);
             Container rawDataContainer(rawdata);
